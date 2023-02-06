@@ -1,7 +1,6 @@
 <script>
 export default {
     props: [
-        "title",
         "data"
     ]
 }
@@ -11,7 +10,7 @@ export default {
 <template>
     <div class="card">
       <div class="card-title">
-        <span class="bold-text">{{title}}</span>
+        <span class="bold-text">{{data.title}}</span>
       </div>
       <div class="card-content">
         <div class="weather">
