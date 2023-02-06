@@ -35,7 +35,7 @@ export default {
     fetchLocationByName(text) {
       if (text.length > 0) {
         fetch(
-          `http://api.openweathermap.org/geo/1.0/direct?q=${text}&limit=5&appid=${API_KEY}`
+          `https://api.openweathermap.org/geo/1.0/direct?q=${text}&limit=5&appid=${API_KEY}`
         )
           .then((data) => data.json())
           .then((json) => {
