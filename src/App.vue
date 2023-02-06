@@ -49,7 +49,6 @@ export default {
       this.parseSettings();
     },
     toggleSettings () {
-      console.log('click');
       this.openSettings = !this.openSettings
     }
   },
@@ -88,8 +87,8 @@ export default {
 </script>
 
 <template>
-  <div class="container relative">
-    <q-btn class="absolute-top-right settings-btn" round  icon="settings" @click="toggleSettings"/>
+  <div class="container relative p-2">
+    <q-btn class="absolute-top-right z-top" round flat icon="settings" @click="toggleSettings"/>
     <div v-if="data.length > 0">
       <CardComponent
         v-for="item in data"
@@ -98,12 +97,10 @@ export default {
         
       />
     </div>
+    <div v-else>
+      <CardComponent        
+      />
+    </div>
     <SettingsPage v-if="openSettings" :settings="settings" :on-change="onSettingsChange" />
   </div>
 </template>
-
-<style scoped>
-.settings-btn {
-  z-index: 300;
-}
-</style>

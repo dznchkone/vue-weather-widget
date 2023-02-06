@@ -13,23 +13,37 @@ export default {
     };
   },
   methods: {
-    debounceSearch(event) {
-      clearTimeout(this.debounce);
-      if (event.target.value.length > 0) {
-        this.debounce = setTimeout(() => {
-          this.searchText = event.target.value;
-          this.fetchLocationByName(event.target.value);
-        }, 500);
-      }
+    startDrag(evt, item) {
+      evt.dataTransfer.dropEffect = "move";
+      evt.dataTransfer.effectAllowed = "move";
+      evt.dataTransfer.setData("itemID", item.id);
+    },
+    onDrop(evt, elID) {
+      const itemID = evt.dataTransfer.getData("itemID");
+      const item = this.currentCities.find((item) => item.id == itemID);
+
+      const temp = this.currentCities.find((item) => item.id == elID);
+
+      console.log(item, temp);
+
+      this.currentCities = [...this.currentCities.map(city=>{
+        if (city.id === temp.id) return ({id:city.id, ...item})
+        if (city.id === item.id) return ({id:city.id, ...temp})
+        return city
+      })]
     },
     fetchLocationByName(text) {
-      fetch(
-        `http://api.openweathermap.org/geo/1.0/direct?q=${text}&limit=5&appid=${API_KEY}`
-      )
-        .then((data) => data.json())
-        .then((json) => {
-          this.searchResult = json;
-        });
+      if (text.length > 0) {
+        fetch(
+          `http://api.openweathermap.org/geo/1.0/direct?q=${text}&limit=5&appid=${API_KEY}`
+        )
+          .then((data) => data.json())
+          .then((json) => {
+            this.searchResult = json;
+          });
+      } else {
+        this.searchResult = null;
+      }
     },
     handleClickListItem(data) {
       this.searchResult = null;
@@ -48,7 +62,11 @@ export default {
       ];
       this.onChange(newSettings);
     },
+    handleDelete(id) {
+      this.currentCities = this.currentCities.filter((item) => item.id !== id);
+    },
   },
+
   created() {
     this.settings.forEach((item) => {
       fetch(
@@ -68,7 +86,7 @@ export default {
 </script>
 
 <template>
-  <q-dialog v-model="open">
+  <q-dialog v-model="open" persistent class="z-max">
     <q-card class="column">
       <q-card-section class="row items-center q-pb-none">
         <div class="text-h6">Settings</div>
@@ -84,36 +102,56 @@ export default {
       </q-card-section>
       <q-card-section>
         <q-list v-if="currentCities.length > 0">
-          <q-item v-for="city in currentCities" :key="city.id">
+          
+          <q-item
+            class="row justify-between items-center shadow-1"
+            v-for="city in currentCities"
+            :key="city.id"
+            draggable="true" 
+            v-on:dragstart="startDrag($event, city)"
+            v-on:drop="onDrop($event,city.id)"
+            @dragover.prevent
+            @dragenter.prevent
+          >
+          <span  >
             <q-icon name="menu"></q-icon>
+          </span>
             <span>{{ city.title }}</span>
-            <q-btn icon="delete"
-            flat 
-            dense></q-btn>
+            <q-btn
+              icon="delete"
+              flat
+              dense
+              @click="handleDelete(city.id)"
+            ></q-btn>
           </q-item>
         </q-list>
       </q-card-section>
 
       <q-card-section class="col">
         <span>Add Location:</span>
-        <div>
-          <input :value="searchText" @input="debounceSearch" />
-          <q-btn icon="search" flat dense />
+        <div class="row">
+          <q-input color="primary" outlined v-model="searchText"> </q-input>
+          <q-btn
+            icon="search"
+            outline
+            color="primary"
+            @click="fetchLocationByName(this.searchText)"
+          />
         </div>
 
-        <q-input color="primary" outlined  v-model="searchText">
+        <q-space />
 
-        </q-input>
-
-        <ul v-if="searchResult">
-          <li
+        <q-list v-if="searchResult">
+          <q-item
+            clickable
+            class="row justify-between items-center shadow-1"
             v-for="result in searchResult"
             :key="result.lat"
-            @click="handleClickListItem(result)"
+            @click="(event) => this.handleClickListItem(result)"
           >
             {{ `${result.name}, ${result.state},  ${result.country}` }}
-          </li>
-        </ul>
+          </q-item>
+        </q-list>
       </q-card-section>
     </q-card>
   </q-dialog>

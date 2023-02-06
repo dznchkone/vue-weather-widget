@@ -8,11 +8,11 @@ export default {
 
 
 <template>
-    <div class="card">
+    <div class="card shadow-1">
       <div class="card-title">
-        <span class="bold-text">{{data.title}}</span>
+        <span class="bold-text">{{data?data.title:"Please add location in settings..."}}</span>
       </div>
-      <div class="card-content">
+      <div v-if="!!data" class="card-content">
         <div class="weather">
           <img class="weather-icon" :src="`http://openweathermap.org/img/wn/${data.weather[0].icon}@2x.png`"/>
           <div class="weather-temp">
@@ -28,7 +28,6 @@ export default {
           </div>
           <div class="info-item">Pressure: <span>{{ data.main.pressure }}hPa</span></div>
           <div class="info-item">Humidity: <span>{{ data.main.humidity }}%</span></div>
-          <div class="info-item">Dew point: <span>{{ data.main.pressure }}</span></div>
           <div class="info-item">Visibility: <span>{{ data.visibility }} meters</span></div>
         </div>
       </div>
